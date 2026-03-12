@@ -450,7 +450,7 @@ public class ApiUIController : MonoBehaviour
             string fullList = "";
                 foreach (var user in scores)
                 {
-                    fullList += $"{user.screenname} - Score: {user.score}\n";
+                    fullList += $"{user.screenname}\n";
                 }
 
         
