@@ -33,7 +33,6 @@ public class CreateHighScoreRequest
     public int wins;
 }
 
-//Template for High Scores coming from Database
 [Serializable]
 public class HghScoreDto
 {

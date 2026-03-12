@@ -6,6 +6,11 @@ using System;
 
 public class ApiUIController : MonoBehaviour
 {
+    public GameObject playUser;
+    public GameObject playUI;
+
+
+
     [Header("Api")]
     [SerializeField]
     APIClient api;
@@ -281,6 +286,7 @@ public class ApiUIController : MonoBehaviour
         var firstname = inputFirstName.text;
         var lastname = inputLastName.text;
         var date = inputDate.text;
+        
       
 
         if(!int.TryParse(inputScore.text, out var score))
@@ -390,7 +396,7 @@ public class ApiUIController : MonoBehaviour
 
                 foreach (var record in scores)
                 {
-                    if (record.screenname.ToLower() == targetName.ToLower())
+                    if (record.screenname != null && record.screenname.ToLower() == targetName.ToLower())
                     {
                         foundUser = record;
                         break;
@@ -404,10 +410,12 @@ public class ApiUIController : MonoBehaviour
                     scoresarr[0] = foundUser;
                     txtSearchList.text = FormatScores(scoresarr);
                     playingId = foundUser._id;
+                    playUI.SetActive(true);
+                    playUser.SetActive(false);
                 }
                 else
                 {
-                    txtSearchList.text = ""; // Clear old text
+                    txtSearchList.text = ""; 
                     SetStatus("The user doesn't exist.", isError: true);
                 }
             },
@@ -471,7 +479,7 @@ public class ApiUIController : MonoBehaviour
 
         SetStatus($"Searching for {targetName}...");
 
-        // Fetch the latest data to ensure we have the correct ID and current values
+     
         StartCoroutine(api.Get("/api/highscores",
             onSuccess: (json) =>
             {
@@ -481,7 +489,7 @@ public class ApiUIController : MonoBehaviour
                 editSearchPanel.SetActive(false);
                 editPanel.SetActive(true);
 
-            // Search the array for the name
+         
             foreach (var user in scores)
                 {
                     if (user.screenname.Equals(targetName, StringComparison.OrdinalIgnoreCase))
@@ -505,25 +513,25 @@ public class ApiUIController : MonoBehaviour
         ));
     }
     
-    // 2. Helper to populate the edit boxes
+    
     private void LoadUserIntoEditFields(HighScoreDto user)
     {
         currentEditingMongoId = user._id; 
 
-        // Fill your existing input fields
+        
         editScreenName.text = user.screenname;
         editFirstName.text = user.firstname;
         editLastName.text = user.lastname;
         editDate.text = user.date;
         editScore.text = user.score.ToString();
 
-        // Toggle Panels
+        
         
 
         SetStatus($"Editing User ID: {currentEditingMongoId}");
     }
     
-    // 3. The actual Save/Update function (Matches your router.put("/:id"))
+    
     public void OnClickSaveEditedUser()
     {
         if (string.IsNullOrEmpty(currentEditingMongoId)) return;
@@ -542,7 +550,7 @@ public class ApiUIController : MonoBehaviour
                 SetStatus("Update Successful!");
                // editPanel.SetActive(false);
                // listPanel.SetActive(true);
-                OnClickFetchScores(); // Refresh the list
+                OnClickFetchScores(); 
         },
             onError: (err) => SetStatus("Update Failed", true),
             auth: true
@@ -620,7 +628,7 @@ public class ApiUIController : MonoBehaviour
                 OnClickFetchScores();
             },
             onError: (err) => SetStatus($"Delete Failed: {err}", true),
-            auth: true // This MUST stay true because your API checks ownership
+            auth: true 
         ));
     }
 

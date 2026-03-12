@@ -21,7 +21,6 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     public void RegisterCharacterIdServerRpc(string characterId)
     {
-        // The server stores this so it knows who this player is
         myCharacterId = characterId;
     }
 
@@ -59,7 +58,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         if (!IsOwner) { return; }
