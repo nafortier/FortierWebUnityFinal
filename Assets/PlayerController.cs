@@ -5,11 +5,16 @@ using UnityEngine.InputSystem;
 public class PlayerController : NetworkBehaviour
 {
     public float moveSpeed;
+    public float jumpHeight = 2.0f;
+    public float gravityValue = -9.81f;
+    private Vector3 playerVelocity;
+    private bool groundedPlayer;
     public NetworkVariable<Color> playerColor = new NetworkVariable<Color>( default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     CharacterController characterController;
     PlayerInput playerInput;
     InputAction moveAction;
+    InputAction jumpAction;
     Renderer rendMat;
 
 
@@ -41,6 +46,8 @@ public class PlayerController : NetworkBehaviour
             RegisterCharacterIdServerRpc(selectedId);
             moveAction = playerInput.actions["Move"];
             moveAction.Enable();
+            jumpAction = playerInput.actions["Jump"];
+            jumpAction.Enable();
         }
         else
         {
@@ -62,11 +69,28 @@ public class PlayerController : NetworkBehaviour
     void Update()
     {
         if (!IsOwner) { return; }
-        
+
+        groundedPlayer = characterController.isGrounded;
+        if (groundedPlayer && playerVelocity.y < 0)
+        {
+            playerVelocity.y = -2f; 
+        }
+
         Vector2 input = moveAction.ReadValue<Vector2>();
+
         Vector3 move = new Vector3(input.x, 0, input.y);
 
-        characterController.Move(move * moveSpeed * Time.deltaTime);
+
+        if (jumpAction.triggered && groundedPlayer)
+        {
+           
+            playerVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravityValue);
+        }
+
+
+        playerVelocity.y += gravityValue * Time.deltaTime;
+        Vector3 finalVelocity = (move * moveSpeed) + playerVelocity;
+        characterController.Move(finalVelocity * Time.deltaTime);
 
         if (Keyboard.current.cKey.wasPressedThisFrame)
         {
