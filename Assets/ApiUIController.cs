@@ -44,6 +44,12 @@ public class ApiUIController : MonoBehaviour
     [SerializeField]
     TMP_InputField inputScreenNameSearch;
 
+
+    [SerializeField]
+    TMP_InputField inputScreenNamePlay;
+
+
+
     [SerializeField]
     TMP_Text txtUsersList;
 
@@ -85,6 +91,8 @@ public class ApiUIController : MonoBehaviour
 
     private string currentEditingMongoId;
     private string idToDelete;
+
+    public string playingId;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -285,7 +293,7 @@ public class ApiUIController : MonoBehaviour
 
     
 
-        StartCoroutine(api.PostJson("/api/highscores", new CreateHighScoreRequest { screenname=player, firstname=firstname, lastname=lastname, date=date,score = score},
+        StartCoroutine(api.PostJson("/api/highscores", new CreateHighScoreRequest { screenname=player, firstname=firstname, lastname=lastname, date=date,score = score, wins=0},
                 onSuccess: (json) =>
                 {
 
@@ -360,7 +368,58 @@ public class ApiUIController : MonoBehaviour
             auth: true
         ));
     }
-    
+
+
+    public void SearchForScreenNamePlay()
+    {
+        string targetName = inputScreenNamePlay.text.Trim();
+
+        if (string.IsNullOrEmpty(targetName))
+        {
+            SetStatus("Please enter a name.", isError: true);
+            return;
+        }
+
+        StartCoroutine(api.Get("/api/highscores",
+            onSuccess: (json) =>
+            {
+                var scores = JsonArrayWrapper.FromJsonArray<HighScoreDto>(json);
+
+
+                HighScoreDto foundUser = null;
+
+                foreach (var record in scores)
+                {
+                    if (record.screenname.ToLower() == targetName.ToLower())
+                    {
+                        foundUser = record;
+                        break;
+                    }
+                }
+
+
+                if (foundUser != null)
+                {
+                    HighScoreDto[] scoresarr = new HighScoreDto[1];
+                    scoresarr[0] = foundUser;
+                    txtSearchList.text = FormatScores(scoresarr);
+                    playingId = foundUser._id;
+                }
+                else
+                {
+                    txtSearchList.text = ""; // Clear old text
+                    SetStatus("The user doesn't exist.", isError: true);
+                }
+            },
+            onError: (err) =>
+            {
+                SetStatus($"Error: {err}", isError: true);
+            },
+            auth: true
+        ));
+    }
+
+
     public void DisplayAllUsersSorted()
     {
         SetStatus("Fetching all users...");
@@ -585,7 +644,7 @@ public class ApiUIController : MonoBehaviour
         for (int i = 0; i < scores.Length; i++)
         {
             var row = scores[i];
-            str += $"{i + 1}. {row.screenname} First Name:{row.firstname} Last Name:{row.firstname} Date:{row.date} Score:{row.score}\n";
+            str += $"{i + 1}. {row.screenname} First Name:{row.firstname} Last Name:{row.firstname} Date:{row.date} Score:{row.score} Wins:{row.wins}\n";
         }
 
 

@@ -30,6 +30,7 @@ public class CreateHighScoreRequest
     public string lastname;
     public string date;
     public int score;
+    public int wins;
 }
 
 //Template for High Scores coming from Database
@@ -43,6 +44,7 @@ public class HghScoreDto
     public string lastname;
     public string date;
     public int score;
+    public int wins;
     public string createdAt;
     public string updatedAt;
 }

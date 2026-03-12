@@ -13,6 +13,7 @@ public class HighScoreDto {
     public string lastname;
     public string date;
     public int score;
+    public int wins;
 
 }
 
